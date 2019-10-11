@@ -17,6 +17,8 @@
     <string name="start_game">Start Game</string>
     <string name="scores">Scores</string>
     <string name="exit">Exit</string>
+    <string name="player1">Player 1</string>
+    <string name="player2">Player 2</string>
 
     <!--Scores Toast-->
     <string name="scores_toast">Will be added in newer versions</string>

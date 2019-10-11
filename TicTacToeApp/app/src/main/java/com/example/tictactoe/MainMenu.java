@@ -7,6 +7,7 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 public class MainMenu extends AppCompatActivity
@@ -15,6 +16,8 @@ public class MainMenu extends AppCompatActivity
     private Button button_start_game;
     private Button button_scores;
     private Button button_exit;
+    private Spinner player_1_list;
+    private Spinner player_2_list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
