@@ -40,8 +40,8 @@ public class MainMenu extends AppCompatActivity
             startActivity(intent);
         }
         else if (view.getId() == button_scores.getId()){
-            Toast.makeText(this, R.string.scores_toast,
-                    Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainMenu.this, ScoreBoard.class);
+            startActivity(intent);
         }
         else{
             finish();

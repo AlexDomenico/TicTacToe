@@ -15,11 +15,16 @@
 
     <!--Main Menu Activity Strings-->
     <string name="start_game">Start Game</string>
-    <string name="scores">Scores</string>
+    <string name="scores">Players &amp; Scores</string>
     <string name="exit">Exit</string>
     <string name="player1">Player 1</string>
     <string name="player2">Player 2</string>
 
-    <!--Scores Toast-->
-    <string name="scores_toast">Will be added in newer versions</string>
+    <!--ScoreBoard Strings-->
+    <string name="button_add_user">Add User</string>
+    <string name="score_name_title">Name</string>
+    <string name="score_wins_title">Wins</string>
+    <string name="score_losses_title">Losses</string>
+    <string name="score_ties_title">Ties</string>
+    <string name="score_delete_title">Delete</string>
 </resources>

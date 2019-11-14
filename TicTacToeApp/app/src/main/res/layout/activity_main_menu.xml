@@ -8,87 +8,71 @@
     <RelativeLayout
         android:layout_width="0dip"
         android:layout_height="fill_parent"
-        android:layout_weight="0.025">
-    </RelativeLayout>
+        android:layout_weight="0.025"></RelativeLayout>
+
     <RelativeLayout
         android:layout_width="0dip"
         android:layout_height="fill_parent"
         android:layout_weight="0.95">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="vertical">
 
             <!--Board Logo-->
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/board"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:src="@drawable/board" />
             <!--Start Game Button-->
             <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/start_game"
                 android:id="@+id/button_start_game"
-                android:background="@drawable/main_menu_buttons"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
-            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/player1"
-                android:textAlignment="center"
-                android:textStyle="bold"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/player2"
-                android:textAlignment="center"
-                android:textStyle="bold"/>
-        </LinearLayout>
+                android:background="@drawable/main_menu_buttons"
+                android:text="@string/start_game" />
+            <!--Player Select-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:weightSum="2">
+                <!--Player 1-->
                 <Spinner
                     android:id="@+id/player_1_list"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1" />
+                <!--Player 2    -->
                 <Spinner
                     android:id="@+id/player_2_list"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1" />
             </LinearLayout>
 
             <!--Scores Button-->
             <Button
+                android:id="@+id/button_scores"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/scores"
-                android:id="@+id/button_scores"
-                android:background="@drawable/main_menu_buttons"/>
+                android:background="@drawable/main_menu_buttons"
+                android:text="@string/scores" />
             <!--Exit Button-->
             <Button
+                android:id="@+id/button_exit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/exit"
-                android:id="@+id/button_exit"
-                android:background="@drawable/main_menu_buttons"/>
+                android:background="@drawable/main_menu_buttons"
+                android:text="@string/exit" />
         </LinearLayout>
     </RelativeLayout>
+
     <RelativeLayout
         android:layout_width="0dip"
         android:layout_height="fill_parent"
-        android:layout_weight="0.025">
-    </RelativeLayout>
+        android:layout_weight="0.025"></RelativeLayout>
 </LinearLayout>
