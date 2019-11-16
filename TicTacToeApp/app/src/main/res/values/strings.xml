@@ -27,4 +27,12 @@
     <string name="score_losses_title">Losses</string>
     <string name="score_ties_title">Ties</string>
     <string name="score_delete_title">Delete</string>
+
+    <string name="update_or_delete">Update or Delete?</string>
+    <string name="update_player">Update</string>
+    <string name="delete_player">Delete</string>
+    <string name="cancel_button">Cancel</string>
+
+    <string name="delete_title">Are you sure you want to delete player &amp; data?</string>
+
 </resources>

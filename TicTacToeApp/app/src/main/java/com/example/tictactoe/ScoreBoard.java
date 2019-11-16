@@ -2,6 +2,7 @@ package com.example.tictactoe;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -9,37 +10,38 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.tictactoe.dialogs.DeleteDialogFragment;
+import com.example.tictactoe.dialogs.UpdateDialogFragment;
+import com.example.tictactoe.dialogs.UpdateOrDeleteDialogFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ScoreBoard extends AppCompatActivity
-        implements View.OnClickListener{
+        implements AdapterView.OnItemClickListener, UpdateOrDeleteDialogFragment.NoticeDialogListener {
 
     private ListView itemsListView;
     private PlayerDB db;
+
+    private static HashMap<String, String> playerUpdateOrDelete = null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_score_board);
         itemsListView = (ListView) findViewById(R.id.itemsListView);
-
+        itemsListView.setOnItemClickListener((AdapterView.OnItemClickListener) this);
 
 
         db = new PlayerDB(this);
         updateDisplay();
-    }
-
-    @Override
-    public void onClick(View view) {
-
     }
 
     private void updateDisplay() {
@@ -140,5 +142,58 @@ public class ScoreBoard extends AppCompatActivity
         });
 
         builder.show();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+        // get player info
+        playerUpdateOrDelete = db.getPlayer(position);
+
+        // Ask update or delete
+        DialogFragment newFragment = new UpdateOrDeleteDialogFragment();
+        newFragment.show(getSupportFragmentManager(), "updateOrDelete");
+    }
+
+    //Update selected
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        try {
+            PlayerUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        DialogFragment newFragment = new UpdateDialogFragment();
+        newFragment.show(getSupportFragmentManager(), "update");
+    }
+
+    //Delete selected
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+//        DialogFragment newFragment = new DeleteDialogFragment();
+//        newFragment.show(getSupportFragmentManager(), "delete");
+
+        PlayerDelete();
+    }
+
+    public static void PlayerUpdateDelete_Cancel(){
+        playerUpdateOrDelete = null;
+    }
+
+    public void PlayerDelete(){
+        if (playerUpdateOrDelete != null){
+            try {
+                db.DeletePlayer(playerUpdateOrDelete);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        updateDisplay();
+        playerUpdateOrDelete = null;
+    }
+
+    public void PlayerUpdate() throws Exception {
+        if (playerUpdateOrDelete != null){
+            db.UpdatePlayer(playerUpdateOrDelete);
+        }
     }
 }

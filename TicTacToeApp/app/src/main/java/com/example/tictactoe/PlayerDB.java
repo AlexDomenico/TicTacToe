@@ -95,4 +95,69 @@ public class PlayerDB {
         }
         closeDB();
     }
+
+    HashMap<String, String> getPlayer(int index){
+        HashMap<String, String> data =
+                new HashMap<String, String>();
+        openReadableDB();
+        String p_querry = "SELECT id, name, wins, losses, ties FROM players WHERE id = ?";
+        Cursor cursor = db.rawQuery(p_querry, new String[] {String.valueOf(index + 1)}, null);
+
+        while (((Cursor) cursor).moveToNext()) {
+            data.put("id", cursor.getString(0));
+            data.put("name", cursor.getString(1));
+            data.put("wins", cursor.getString(2));
+            data.put("losses", cursor.getString(3));
+            data.put("ties", cursor.getString(4));
+        }
+
+        if (cursor != null){
+            cursor.close();
+        }
+        closeDB();
+        return data;
+    }
+
+    void UpdatePlayer(HashMap<String, String> player) throws Exception{
+        openWriteableDB();
+
+        ContentValues content = new ContentValues();
+
+        content.put("name", String.valueOf(player.get("name")));
+
+        String where_querry = "id = ?";
+        long nResult = db.update("players", content, where_querry, new String[] {String.valueOf(player.get("id"))});
+        if (nResult == -1) {
+            throw new Exception("no data");
+        }
+
+        closeDB();
+    }
+
+    void DeletePlayer(HashMap<String, String> player) throws  Exception{
+        openWriteableDB();
+
+        String where_querry = "id = ?";
+        long nResult = db.delete("players", where_querry, new String[]{String.valueOf(player.get("id"))});
+        if (nResult == -1){
+            throw new Exception("no data");
+        }
+
+        closeDB();
+    }
+
+    ArrayList<String> getNames(){
+        ArrayList<String> namesList = new ArrayList<>();
+        openReadableDB();
+        Cursor cursor = db.rawQuery("SELECT name FROM players", null);
+        while (((Cursor) cursor).moveToNext()){
+            namesList.add(cursor.getString(0));
+        }
+        if (cursor != null){
+            cursor.close();
+        }
+
+        closeDB();
+        return namesList;
+    }
 }
