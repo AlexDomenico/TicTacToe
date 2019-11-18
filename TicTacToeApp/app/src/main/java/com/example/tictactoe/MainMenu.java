@@ -73,14 +73,32 @@ public class MainMenu extends AppCompatActivity
         player_2_list.setAdapter(dataAdapter);
 
         //Make 2nd spinner different than first
-        player_2_list.setSelection(1);
+        if (player_2_list.getCount() > 1) {
+            player_2_list.setSelection(1);
+        }
     }
 
     @Override
     public void onClick(View view) {
         if (view.getId() == button_start_game.getId()){
-            Intent intent = new Intent(MainMenu.this, GameBoard.class);
-            startActivity(intent);
+            if (player_1_list.getSelectedItem() == null || player_2_list.getSelectedItem() == null){
+                Toast.makeText(getApplicationContext(), R.string.invalidNumUsersErrMsg,
+                        Toast.LENGTH_LONG).show();
+            }
+            else if (player_1_list.getSelectedItem().toString() != player_2_list.getSelectedItem().toString()) {
+                Intent intent = new Intent(MainMenu.this, GameBoard.class);
+
+                Bundle extras = new Bundle();
+                extras.putString("player1", player_1_list.getSelectedItem().toString());
+                extras.putString("player2", player_2_list.getSelectedItem().toString());
+
+                intent.putExtras(extras);
+                startActivity(intent);
+            }
+            else{
+                Toast.makeText(getApplicationContext(), R.string.repeatUsersErrMsg,
+                        Toast.LENGTH_SHORT).show();
+            }
         }
         else if (view.getId() == button_scores.getId()){
             Intent intent = new Intent(MainMenu.this, ScoreBoard.class);

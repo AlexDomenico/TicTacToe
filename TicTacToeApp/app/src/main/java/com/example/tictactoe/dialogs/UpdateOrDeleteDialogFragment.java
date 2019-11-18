@@ -9,14 +9,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.tictactoe.R;
-import com.example.tictactoe.ScoreBoard;
 
 import static com.example.tictactoe.ScoreBoard.PlayerUpdateDelete_Cancel;
 
 public class UpdateOrDeleteDialogFragment extends DialogFragment {
     public interface NoticeDialogListener{
-        public void onDialogPositiveClick(DialogFragment dialog);
-        public void onDialogNegativeClick(DialogFragment dialog);
+        void onDialogPositiveClick(DialogFragment dialog);
+        void onDialogNegativeClick(DialogFragment dialog);
     }
 
     NoticeDialogListener listener;
@@ -35,7 +34,9 @@ public class UpdateOrDeleteDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.update_or_delete)
+        String username = getArguments().getString("username");
+        String title = getContext().getResources().getString(R.string.update_or_delete);
+        builder.setMessage(title + " " + username)
                 //Update
                 .setPositiveButton(R.string.update_player, new DialogInterface.OnClickListener() {
                     @Override

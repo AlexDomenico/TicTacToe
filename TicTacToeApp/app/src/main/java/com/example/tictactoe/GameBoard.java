@@ -2,6 +2,7 @@ package com.example.tictactoe;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -31,6 +32,13 @@ public class GameBoard extends AppCompatActivity
     private List<String> xPlacements = new ArrayList<String>();
     private List<String> oPlacements = new ArrayList<String>();
 
+    private String player1Name;
+    private String player2Name;
+
+    private PlayerDB db;
+
+    private boolean gameEnded;
+
     private String[][] winningCombinations = {
             {"00", "01", "02"}, {"10", "11", "12"}, {"20", "21", "22"},
             {"00", "10", "20"}, {"01", "11", "21"}, {"02", "12", "22"},
@@ -41,6 +49,15 @@ public class GameBoard extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_board);
+
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        player1Name = extras.getString("player1");
+        player2Name = extras.getString("player2");
+
+        gameEnded = false;
+
+        db = new PlayerDB(this);
 
         LoadWidgets();
         ResetBoard();
@@ -53,11 +70,9 @@ public class GameBoard extends AppCompatActivity
         super.onPause();
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
-
         GetSavedValues();
     }
 
@@ -117,22 +132,32 @@ public class GameBoard extends AppCompatActivity
         editor.putStringSet("xPlacementSet", xPlacementSet);
         editor.putStringSet("oPlacementSet", oPlacementSet);
         editor.putInt("turn", turn);
+        editor.putString("player1", player1Name);
+        editor.putString("player2", player2Name);
         editor.commit();
     }
 
     private void GetSavedValues() {
-        Set<String> xPlacementSet = savedValues.getStringSet("xPlacementSet", null);
-        Set<String> oPlacementSet = savedValues.getStringSet("oPlacementSet", null);
-        turn = savedValues.getInt("turn", 0);
+        String player1 = savedValues.getString("player1", null);
+        String player2 = savedValues.getString("player2", null);
 
-        if (xPlacementSet != null || oPlacementSet != null){
-            for (String x : xPlacementSet){
-                xPlacements.add(x);
+        if (player1.equals(player1Name) && player2.equals(player2Name)){
+            Set<String> xPlacementSet = savedValues.getStringSet("xPlacementSet", null);
+            Set<String> oPlacementSet = savedValues.getStringSet("oPlacementSet", null);
+            turn = savedValues.getInt("turn", 0);
+
+            if (xPlacementSet != null || oPlacementSet != null){
+                for (String x : xPlacementSet){
+                    xPlacements.add(x);
+                }
+                for (String o : oPlacementSet){
+                    oPlacements.add(o);
+                }
+                BuildBoard();
             }
-            for (String o : oPlacementSet){
-                oPlacements.add(o);
-            }
-            BuildBoard();
+        }
+        else{
+            ResetBoard();
         }
     }
 
@@ -208,7 +233,8 @@ public class GameBoard extends AppCompatActivity
     }
 
     private void XWins(List<String> winningList) {
-        textViewGameInfo.setText(R.string.x_win);
+        String playerWins = textViewGameInfo.getContext().getResources().getString(R.string.playerWins);
+        textViewGameInfo.setText(player1Name + " " + playerWins);
         for (int i = 0; i < winningList.size(); i++){
             //Gets board row location of 1 winning piece
             int boardRow = Integer.parseInt(winningList.get(i) )/ 10;
@@ -218,10 +244,18 @@ public class GameBoard extends AppCompatActivity
             aButtons[boardRow][boardColumn].setImageResource(R.drawable.win_x);
         }
         FreezeBoard();
+
+        // Update DB for X win
+        try {
+            db.UpdateScores(player1Name, player2Name, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void OWins(List<String> winningList) {
-        textViewGameInfo.setText(R.string.o_win);
+        String playerWins = textViewGameInfo.getContext().getResources().getString(R.string.playerWins);
+        textViewGameInfo.setText(player2Name + " " + playerWins);
         for (int i = 0; i < winningList.size(); i++){
             //Gets board row location of 1 winning piece
             int boardRow = Integer.parseInt(winningList.get(i) ) / 10;
@@ -231,6 +265,13 @@ public class GameBoard extends AppCompatActivity
             aButtons[boardRow][boardColumn].setImageResource(R.drawable.win_o);
         }
         FreezeBoard();
+
+        // Update DB for O win
+        try {
+            db.UpdateScores(player2Name, player1Name, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void FreezeBoard() {
@@ -239,18 +280,27 @@ public class GameBoard extends AppCompatActivity
                 aButtons[i][j].setEnabled(false);
             }
         }
+        gameEnded = true;
     }
 
     private void UpdateTextViewGameInfo() {
         if (turn != 9){
+            String playersTurn = textViewGameInfo.getContext().getResources().getString(R.string.playersTurn);
             if (turn % 2 == 0){
-                textViewGameInfo.setText(R.string.x_turn);
+                textViewGameInfo.setText(player1Name + playersTurn);
             } else {
-                textViewGameInfo.setText(R.string.o_turn);
+                textViewGameInfo.setText(player2Name + playersTurn);
             }
         }
         else{
             textViewGameInfo.setText(R.string.tie_game);
+            FreezeBoard();
+            // Update DB for tie game
+            try {
+                db.UpdateScores(player1Name, player2Name, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -277,6 +327,9 @@ public class GameBoard extends AppCompatActivity
                 return true;
             default:
                 this.finish();
+                if (gameEnded){
+                    ResetBoard();
+                }
                 return true;
         }
     }

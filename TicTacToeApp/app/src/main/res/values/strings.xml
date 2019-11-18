@@ -4,11 +4,13 @@
     <!--Turns-->
     <string name="x_turn">X\'s Turn</string>
     <string name="o_turn">O\'s Turn</string>
+    <string name="playersTurn">\'s Turn</string>
 
     <!--Results-->
     <string name="x_win">X Wins</string>
     <string name="o_win">O Wins</string>
     <string name="tie_game">Tie Game</string>
+    <string name="playerWins">Wins</string>
 
     <!--Menu Strings-->
     <string name="button_new_game">New Game</string>
@@ -19,6 +21,8 @@
     <string name="exit">Exit</string>
     <string name="player1">Player 1</string>
     <string name="player2">Player 2</string>
+    <string name="invalidNumUsersErrMsg">Please add users in the PLAYERS &amp; SCORES menu</string>
+    <string name="repeatUsersErrMsg">Please select 2 different users to play</string>
 
     <!--ScoreBoard Strings-->
     <string name="button_add_user">Add User</string>
@@ -28,8 +32,8 @@
     <string name="score_ties_title">Ties</string>
     <string name="score_delete_title">Delete</string>
 
-    <string name="update_or_delete">Update or Delete?</string>
-    <string name="update_player">Update</string>
+    <string name="update_or_delete">Update or Delete User</string>
+    <string name="update_player">Update </string>
     <string name="delete_player">Delete</string>
     <string name="cancel_button">Cancel</string>
 

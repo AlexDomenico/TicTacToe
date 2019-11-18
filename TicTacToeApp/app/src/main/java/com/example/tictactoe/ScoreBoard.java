@@ -16,21 +16,20 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-import com.example.tictactoe.dialogs.DeleteDialogFragment;
 import com.example.tictactoe.dialogs.UpdateDialogFragment;
 import com.example.tictactoe.dialogs.UpdateOrDeleteDialogFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 public class ScoreBoard extends AppCompatActivity
-        implements AdapterView.OnItemClickListener, UpdateOrDeleteDialogFragment.NoticeDialogListener {
+        implements AdapterView.OnItemClickListener, UpdateOrDeleteDialogFragment.NoticeDialogListener,
+         UpdateDialogFragment.UserNamePasser{
 
     private ListView itemsListView;
     private PlayerDB db;
 
-    private static HashMap<String, String> playerUpdateOrDelete = null;
+    private static String playerUpdateOrDelete = null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,31 +95,8 @@ public class ScoreBoard extends AppCompatActivity
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String userName = userNameInput.getText().toString();
-                boolean repeatUser = false;
+                boolean repeatUser = CheckIfUsernameExists(userName);
 
-                ArrayList<HashMap<String, String>> users = db.getPlayers();
-
-                //Checks if name is already used
-                outerloop:
-                for(HashMap<String, String> entry : users){
-                    for(Map.Entry mapEntry : entry.entrySet()){
-                        //Checks for only names
-                        if (mapEntry.getKey() == "name"){
-                            String name = mapEntry.getValue().toString();
-                            //If username exists return error toast
-                            if (name.equals(userName)){
-                                Toast.makeText(getApplicationContext(), "User already added",
-                                        Toast.LENGTH_SHORT).show();
-                                repeatUser = true;
-                                break outerloop;
-                            }
-                            //Skip to next item
-                            else{
-                                break;
-                            }
-                        }
-                    }
-                }
                 if (!repeatUser){
                     try {
                         db.insertPlayer(userNameInput.getText().toString());
@@ -146,25 +122,72 @@ public class ScoreBoard extends AppCompatActivity
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        // get player info
-        playerUpdateOrDelete = db.getPlayer(position);
+
+        SimpleAdapter a = (SimpleAdapter) itemsListView.getAdapter();
+        HashMap<String, String> x = (HashMap<String, String>) a.getItem(position);
+
+        // get player name
+        playerUpdateOrDelete = x.get("name");
+
+        // Add bundle with name for fragment
+        Bundle bundle = new Bundle();
+        bundle.putString("username", playerUpdateOrDelete);
 
         // Ask update or delete
         DialogFragment newFragment = new UpdateOrDeleteDialogFragment();
+        newFragment.setArguments(bundle);
         newFragment.show(getSupportFragmentManager(), "updateOrDelete");
     }
 
     //Update selected
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        try {
-            PlayerUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Bundle bundle = new Bundle();
+        bundle.putString("username", playerUpdateOrDelete);
+
         DialogFragment newFragment = new UpdateDialogFragment();
+        newFragment.setArguments(bundle);
         newFragment.show(getSupportFragmentManager(), "update");
     }
+
+    @Override
+    public void userNamePasser(String updatedUserName){
+        boolean repeatUser = CheckIfUsernameExists(updatedUserName);
+
+        if (!repeatUser) {
+            //Update player username
+            try {
+                db.UpdatePlayer(playerUpdateOrDelete, updatedUserName);
+                Toast.makeText(getApplicationContext(), "User " + updatedUserName + " updated",
+                        Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        PlayerUpdateDelete_Cancel();
+        updateDisplay();
+    }
+
+    private boolean CheckIfUsernameExists(String username) {
+        ArrayList<HashMap<String, String>> users = db.getPlayers();
+        boolean repeatUser = false;
+
+        //Checks if name is already used
+        for(HashMap<String, String> entry : users) {
+            String name = String.valueOf(entry.get("name"));
+
+            //If username exists return error toast
+            if (name.equals(username)) {
+                Toast.makeText(getApplicationContext(), "Username " + username + " already used",
+                        Toast.LENGTH_LONG).show();
+                repeatUser = true;
+                //End loop if found
+                break;
+            }
+        }
+        return repeatUser;
+    }
+
 
     //Delete selected
     @Override
@@ -189,11 +212,5 @@ public class ScoreBoard extends AppCompatActivity
         }
         updateDisplay();
         playerUpdateOrDelete = null;
-    }
-
-    public void PlayerUpdate() throws Exception {
-        if (playerUpdateOrDelete != null){
-            db.UpdatePlayer(playerUpdateOrDelete);
-        }
     }
 }

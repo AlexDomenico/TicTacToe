@@ -10,6 +10,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static java.lang.Integer.parseInt;
+
 public class PlayerDB {
     //database constants
     public static final String DB_NAME = "player.sqlite";
@@ -68,9 +70,10 @@ public class PlayerDB {
         ArrayList<HashMap<String, String>> data =
                 new ArrayList<HashMap<String, String>>();
         openReadableDB();
-        Cursor cursor = db.rawQuery("SELECT name, wins, losses, ties FROM players", null);
+        Cursor cursor = db.rawQuery("SELECT name, wins, losses, ties, id FROM players ORDER BY wins DESC", null);
         while (((Cursor) cursor).moveToNext()){
             HashMap<String, String> map = new HashMap<String, String>();
+            map.put("id", cursor.getString(4));
             map.put("name", cursor.getString(0));
             map.put("wins", cursor.getString(1));
             map.put("losses", cursor.getString(2));
@@ -96,12 +99,12 @@ public class PlayerDB {
         closeDB();
     }
 
-    HashMap<String, String> getPlayer(int index){
+    HashMap<String, String> getPlayer(long index){
         HashMap<String, String> data =
                 new HashMap<String, String>();
         openReadableDB();
         String p_querry = "SELECT id, name, wins, losses, ties FROM players WHERE id = ?";
-        Cursor cursor = db.rawQuery(p_querry, new String[] {String.valueOf(index + 1)}, null);
+        Cursor cursor = db.rawQuery(p_querry, new String[] {String.valueOf(index)}, null);
 
         while (((Cursor) cursor).moveToNext()) {
             data.put("id", cursor.getString(0));
@@ -118,15 +121,30 @@ public class PlayerDB {
         return data;
     }
 
-    void UpdatePlayer(HashMap<String, String> player) throws Exception{
-        openWriteableDB();
+    void UpdatePlayer(String player, String newUserName) throws Exception{
+        openReadableDB();
 
         ContentValues content = new ContentValues();
+        content.put("name", newUserName);
 
-        content.put("name", String.valueOf(player.get("name")));
+        String p_querry = "SELECT id, name, wins, losses, ties FROM players WHERE name = ?";
 
-        String where_querry = "id = ?";
-        long nResult = db.update("players", content, where_querry, new String[] {String.valueOf(player.get("id"))});
+        Cursor cursor = db.rawQuery(p_querry, new String[] {player}, null);
+
+        ContentValues values = new ContentValues();
+        while (((Cursor) cursor).moveToNext()) {
+            values.put("name", newUserName);
+            values.put("wins", cursor.getString(2));
+            values.put("losses", cursor.getString(3));
+            values.put("ties", cursor.getString(4));
+        }
+
+        closeDB();
+        openWriteableDB();
+
+        String where_querry = "name = ?";
+
+        long nResult = db.update("players", values, where_querry, new String[] {player});
         if (nResult == -1) {
             throw new Exception("no data");
         }
@@ -134,11 +152,11 @@ public class PlayerDB {
         closeDB();
     }
 
-    void DeletePlayer(HashMap<String, String> player) throws  Exception{
+    void DeletePlayer(String player) throws  Exception{
         openWriteableDB();
 
-        String where_querry = "id = ?";
-        long nResult = db.delete("players", where_querry, new String[]{String.valueOf(player.get("id"))});
+        String where_querry = "name = ?";
+        long nResult = db.delete("players", where_querry, new String[]{player});
         if (nResult == -1){
             throw new Exception("no data");
         }
@@ -159,5 +177,63 @@ public class PlayerDB {
 
         closeDB();
         return namesList;
+    }
+
+    void UpdateScores(String winnerName, String loserName, boolean tie) throws Exception {
+        openReadableDB();
+
+        String p_querry = "SELECT id, name, wins, losses, ties FROM players WHERE name = ?";
+
+        //Winner values
+        Cursor cursor = db.rawQuery(p_querry, new String[] {winnerName}, null);
+        ContentValues winnerValues = new ContentValues();
+        while (((Cursor) cursor).moveToNext()) {
+            winnerValues.put("name", cursor.getString(1));
+            winnerValues.put("wins", cursor.getString(2));
+            winnerValues.put("losses", cursor.getString(3));
+            winnerValues.put("ties", cursor.getString(4));
+        }
+
+        //Loser values
+        cursor = db.rawQuery(p_querry, new String[] {loserName}, null);
+        ContentValues loserValues = new ContentValues();
+        while (((Cursor) cursor).moveToNext()) {
+            loserValues.put("name", cursor.getString(1));
+            loserValues.put("wins", cursor.getString(2));
+            loserValues.put("losses", cursor.getString(3));
+            loserValues.put("ties", cursor.getString(4));
+        }
+
+        closeDB();
+
+        if (!tie){
+            int winHolder = parseInt((String) winnerValues.get("wins")) + 1;
+            winnerValues.put("wins", winHolder);
+            int lossHolder = parseInt((String) loserValues.get("losses")) + 1;
+            loserValues.put("losses", lossHolder);
+        }
+        else{
+            int winnerTieHolder = parseInt((String) winnerValues.get("ties")) + 1;
+            winnerValues.put("ties", winnerTieHolder);
+            int loserTieHolder = parseInt((String) loserValues.get("ties")) + 1;
+            loserValues.put("ties", loserTieHolder);
+        }
+
+        openWriteableDB();
+        String where_querry = "name = ?";
+
+        // Winner update
+        long nResult = db.update("players", winnerValues, where_querry, new String[] {winnerName});
+        if (nResult == -1) {
+            throw new Exception("no data");
+        }
+
+        //Loser update
+        nResult = db.update("players", loserValues, where_querry, new String[]{loserName});
+        if (nResult == -1) {
+            throw new Exception("no data");
+        }
+
+        closeDB();
     }
 }
