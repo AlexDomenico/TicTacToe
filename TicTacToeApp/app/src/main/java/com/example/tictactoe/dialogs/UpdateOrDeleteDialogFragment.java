@@ -10,12 +10,13 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.tictactoe.R;
 
-import static com.example.tictactoe.ScoreBoard.PlayerUpdateDelete_Cancel;
-
 public class UpdateOrDeleteDialogFragment extends DialogFragment {
+    private String activeUserName;
+
+
     public interface NoticeDialogListener{
-        void onDialogPositiveClick(DialogFragment dialog);
-        void onDialogNegativeClick(DialogFragment dialog);
+        void onDialogPositiveClick(DialogFragment dialog, String username);
+        void onDialogNegativeClick(DialogFragment dialog, String username);
     }
 
     NoticeDialogListener listener;
@@ -34,15 +35,15 @@ public class UpdateOrDeleteDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        String username = getArguments().getString("username");
+        activeUserName = getArguments().getString("username");
         String title = getContext().getResources().getString(R.string.update_or_delete);
-        builder.setMessage(title + " " + username)
+        builder.setMessage(title + " " + activeUserName)
                 //Update
                 .setPositiveButton(R.string.update_player, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         //Update player
-                        listener.onDialogPositiveClick(UpdateOrDeleteDialogFragment.this);
+                        listener.onDialogPositiveClick(UpdateOrDeleteDialogFragment.this, activeUserName);
                     }
                 })
 
@@ -51,7 +52,7 @@ public class UpdateOrDeleteDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         //Delete player
-                        listener.onDialogNegativeClick(UpdateOrDeleteDialogFragment.this);
+                        listener.onDialogNegativeClick(UpdateOrDeleteDialogFragment.this, activeUserName);
                     }
                 })
 
@@ -60,7 +61,6 @@ public class UpdateOrDeleteDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         //Cancel update/delete
-                        PlayerUpdateDelete_Cancel();
                     }
                 });
         return builder.create();

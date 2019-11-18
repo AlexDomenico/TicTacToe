@@ -7,21 +7,15 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.InputType;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.tictactoe.R;
-import com.example.tictactoe.ScoreBoard;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class UpdateDialogFragment extends DialogFragment {
     public interface UserNamePasser{
-        public void userNamePasser(String updatedUserName);
+        void userNamePasser(String oldUserName, String updatedUserName);
     }
 
     UserNamePasser listener;
@@ -40,9 +34,9 @@ public class UpdateDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        String username = getArguments().getString("username");
+        final String oldUserName = getArguments().getString("activeUserName");
         String title = getContext().getResources().getString(R.string.update_player);
-        builder.setMessage(title + " " + username + "'s username");
+        builder.setMessage(title + " " + oldUserName + "'s username");
 
         //Set up the input
         final EditText updateUserNameInput = new EditText(getActivity());
@@ -53,9 +47,9 @@ public class UpdateDialogFragment extends DialogFragment {
         builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                String userName = updateUserNameInput.getText().toString();
+                String newUserName = updateUserNameInput.getText().toString();
 
-                listener.userNamePasser(userName);
+                listener.userNamePasser(oldUserName, newUserName);
             }
         })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

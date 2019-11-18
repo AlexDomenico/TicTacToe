@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.example.tictactoe.dialogs.AddUserDialog;
 import com.example.tictactoe.dialogs.UpdateDialogFragment;
 import com.example.tictactoe.dialogs.UpdateOrDeleteDialogFragment;
 
@@ -24,12 +25,13 @@ import java.util.HashMap;
 
 public class ScoreBoard extends AppCompatActivity
         implements AdapterView.OnItemClickListener, UpdateOrDeleteDialogFragment.NoticeDialogListener,
-         UpdateDialogFragment.UserNamePasser{
+         UpdateDialogFragment.UserNamePasser,
+         AddUserDialog.AddUserNamePasser{
 
     private ListView itemsListView;
     private PlayerDB db;
 
-    private static String playerUpdateOrDelete = null;
+
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,8 @@ public class ScoreBoard extends AppCompatActivity
             case R.id.add_user:
                 Toast.makeText(this, "Add User",
                         Toast.LENGTH_SHORT).show();
-                AddUser();
+                DialogFragment newFragment = new AddUserDialog();
+                newFragment.show(getSupportFragmentManager(), "add user");
                 return true;
             default:
                 this.finish();
@@ -80,58 +83,14 @@ public class ScoreBoard extends AppCompatActivity
         }
     }
 
-    private void AddUser() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add User");
-
-        //Set up the input
-        final EditText userNameInput = new EditText(this);
-        userNameInput.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(userNameInput);
-
-        // Set up the buttons
-        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                String userName = userNameInput.getText().toString();
-                boolean repeatUser = CheckIfUsernameExists(userName);
-
-                if (!repeatUser){
-                    try {
-                        db.insertPlayer(userNameInput.getText().toString());
-                        updateDisplay();
-                        Toast.makeText(getApplicationContext(), "New User Added",
-                                Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-
-        builder.show();
-    }
-
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 
-        SimpleAdapter a = (SimpleAdapter) itemsListView.getAdapter();
-        HashMap<String, String> x = (HashMap<String, String>) a.getItem(position);
-
-        // get player name
-        playerUpdateOrDelete = x.get("name");
+        String activeUserName = GetActiveUserName(position);
 
         // Add bundle with name for fragment
         Bundle bundle = new Bundle();
-        bundle.putString("username", playerUpdateOrDelete);
+        bundle.putString("username", activeUserName);
 
         // Ask update or delete
         DialogFragment newFragment = new UpdateOrDeleteDialogFragment();
@@ -139,11 +98,20 @@ public class ScoreBoard extends AppCompatActivity
         newFragment.show(getSupportFragmentManager(), "updateOrDelete");
     }
 
+    private String GetActiveUserName(int position) {
+        SimpleAdapter a = (SimpleAdapter) itemsListView.getAdapter();
+        HashMap<String, String> adapterItem = (HashMap<String, String>) a.getItem(position);
+
+        // get player name
+        String activeUserName = adapterItem.get("name");
+        return activeUserName;
+    }
+
     //Update selected
     @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
+    public void onDialogPositiveClick(DialogFragment dialog, String activeUserName) {
         Bundle bundle = new Bundle();
-        bundle.putString("username", playerUpdateOrDelete);
+        bundle.putString("activeUserName", activeUserName);
 
         DialogFragment newFragment = new UpdateDialogFragment();
         newFragment.setArguments(bundle);
@@ -151,20 +119,19 @@ public class ScoreBoard extends AppCompatActivity
     }
 
     @Override
-    public void userNamePasser(String updatedUserName){
+    public void userNamePasser(String oldUserName, String updatedUserName){
         boolean repeatUser = CheckIfUsernameExists(updatedUserName);
 
         if (!repeatUser) {
             //Update player username
             try {
-                db.UpdatePlayer(playerUpdateOrDelete, updatedUserName);
+                db.UpdatePlayer(oldUserName, updatedUserName);
                 Toast.makeText(getApplicationContext(), "User " + updatedUserName + " updated",
                         Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        PlayerUpdateDelete_Cancel();
         updateDisplay();
     }
 
@@ -191,26 +158,37 @@ public class ScoreBoard extends AppCompatActivity
 
     //Delete selected
     @Override
-    public void onDialogNegativeClick(DialogFragment dialog) {
+    public void onDialogNegativeClick(DialogFragment dialog, String username) {
 //        DialogFragment newFragment = new DeleteDialogFragment();
 //        newFragment.show(getSupportFragmentManager(), "delete");
 
-        PlayerDelete();
+        PlayerDelete(username);
     }
 
-    public static void PlayerUpdateDelete_Cancel(){
-        playerUpdateOrDelete = null;
-    }
-
-    public void PlayerDelete(){
-        if (playerUpdateOrDelete != null){
+    public void PlayerDelete(String username){
+        if (username != null){
             try {
-                db.DeletePlayer(playerUpdateOrDelete);
+                db.DeletePlayer(username);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         updateDisplay();
-        playerUpdateOrDelete = null;
+    }
+
+    @Override
+    public void addUserNamePasser(String addUsername) {
+        boolean repeatUser = CheckIfUsernameExists(addUsername);
+
+        if (!repeatUser){
+            try {
+                db.insertPlayer(addUsername);
+                updateDisplay();
+                Toast.makeText(getApplicationContext(), "New User Added",
+                        Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
