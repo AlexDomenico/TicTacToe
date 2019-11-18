@@ -1,8 +1,7 @@
 # TicTacToe
 
-Create DB functionality
+MainMenu Lanscape View Update  
 
-Add players/spinners to landscape mode  
-Add functionality to Players in Main Menu  
-  -Load users to spinners  
-  -Set default spinner to "Select User"
+Tidy up coding  
+
+Pretty up dialogfragments
